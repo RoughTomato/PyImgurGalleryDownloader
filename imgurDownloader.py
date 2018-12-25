@@ -30,22 +30,24 @@ parser.add_argument("-u", "--url", dest="url",
                             help="provide url for the gallery", metavar="URL")
 
 args = parser.parse_args()
+if args.url is None:
+    parser.print_help()
+else:
+    url = "https://api.imgur.com/3/gallery/" + args.url
+    payload = {}
+    headers = {
+              'Authorization': 'Client-ID ' + authKey
+    }
+    response = requests.request('GET', url, headers = headers, data = payload, allow_redirects=0)
 
-url = "https://api.imgur.com/3/gallery/" + args.url
-payload = {}
-headers = {
-          'Authorization': 'Client-ID ' + authKey
-          }
-response = requests.request('GET', url, headers = headers, data = payload, allow_redirects=0)
+    if (response == 404):
+        print "Page not found"
+    if (response == 403):
+        print "Access Denied"
 
-if (response == 404):
-    print "Page not found"
-if (response == 403):
-    print "Access Denied"
+    data = json.loads(response.text)
 
-data = json.loads(response.text)
-
-for images in data['data']['images']:
-    print('downloading ' + images['link'])
-    downloadFromURL(images['link'],images['id'] + '.' + mimeToExtension(images['type']))
+    for images in data['data']['images']:
+        print('downloading ' + images['link'])
+        downloadFromURL(images['link'],images['id'] + '.' + mimeToExtension(images['type']))
 
