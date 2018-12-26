@@ -5,10 +5,17 @@ import json
 import urllib2
 import os
 
+directory = "./"
+
 def downloadFromURL(url, name):
     request = urllib2.Request(url)
     img = urllib2.urlopen(request).read()
-    with open (name, 'w') as f: f.write(img)
+    if not os.path.isdir(directory):
+        try:
+            os.mkdir(directory)
+        except OSError:
+            print ("Couldn't create directory %s" % directory)
+    with open(os.path.join(directory,name), 'w') as f: f.write(img)
 
 def mimeToExtension(mime):
     def jpeg():
@@ -31,8 +38,12 @@ parser.add_argument("-a", "--auth", dest="authkey",
                             help="provide authorisation API key", metavar="AUTH")
 parser.add_argument("-s", "--save", dest="savekey", 
                             help="store authorisation API key", metavar="SAVE")
+parser.add_argument("-d", "--directory", dest="directory",
+                            help="select download directory", metavar="DIRECTORY")
 
 args = parser.parse_args()
+if not args.directory is None:
+    directory = args.directory
 if args.gallery is None:
     parser.print_help()
 elif args.authkey is None and not os.path.isfile('./authkey.txt'):
